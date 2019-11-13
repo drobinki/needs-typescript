@@ -1,0 +1,42 @@
+Resources:
+  CognitoUserPoolDrobinki:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: drobinki-user-pool
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      Schema:
+        - AttributeDataType: String
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Name: email
+          Required: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 6
+          RequireLowercase: False
+          RequireNumbers: True
+          RequireSymbols: False
+          RequireUppercase: True
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ExplicitAuthFlows:
+        - ADMIN_NO_SRP_AUTH
+        - USER_PASSWORD_AUTH
+      GenerateSecret: false
+      UserPoolId:
+        !Ref CognitoUserPoolDrobinki
+      RefreshTokenValidity: 7
+
+Outputs:
+  UserPoolId:
+    Value:
+      Ref: CognitoUserPoolDrobinki
+
+  UserPoolClientId:
+    Value:
+      Ref: UserPoolClient
