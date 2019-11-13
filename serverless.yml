@@ -19,3 +19,8 @@ functions:
       - http:
           method: get
           path: hello
+
+resources:
+  # Cognito
+  - ${file(resources/cognito-user-pool.yml)}
+
