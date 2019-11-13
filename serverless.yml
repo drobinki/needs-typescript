@@ -7,7 +7,6 @@ plugins:
 provider:
   name: aws
   runtime: nodejs10.x
-  profile: serverless-admin
 
 functions:
   hello:
