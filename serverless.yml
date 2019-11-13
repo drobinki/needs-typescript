@@ -7,6 +7,7 @@ plugins:
 provider:
   name: aws
   runtime: nodejs10.x
+  region: eu-central-1
 
 functions:
   hello:
@@ -15,8 +16,12 @@ functions:
       - http:
           method: get
           path: hello
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref DrobinkiApiGateway
 
 resources:
+  - ${file(resources/api-gateway.yml)}
   # Cognito
   - ${file(resources/cognito-user-pool.yml)}
 

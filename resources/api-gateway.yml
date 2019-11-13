@@ -1,0 +1,17 @@
+Resources:
+  DrobinkiApiGateway:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      AuthorizerResultTtlInSeconds: 300
+      IdentitySource: method.request.header.Authorization
+      Name: CognitoAuthorizer
+      RestApiId: !Ref ApiGatewayRestApi
+      Type: COGNITO_USER_POOLS
+      ProviderARNs:
+        - !GetAtt CognitoUserPoolDrobinki.Arn
+
+
+Outputs:
+  AuthorizerId:
+    Value:
+      Ref: DrobinkiApiGateway
