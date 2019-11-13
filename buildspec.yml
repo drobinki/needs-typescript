@@ -2,6 +2,8 @@ version: 0.2
 
 phases:
   install:
+    runtime-versions:
+      nodejs: 10
     commands:
       - npm install --silent --no-progress -g npm
       - npm install --silent --no-progress -g serverless
@@ -10,10 +12,11 @@ phases:
       - npm install --silent --no-progress
   build:
     commands:
-      - npm run-script lint
-      - npm run test
-      - mkdir target
-      - serverless package --package target -r eu-central-1
+#      - npm run-script lint
+#      - npm run test
+#      - mkdir target
+#      - serverless package --package target -r eu-central-1
+      - serverless deploy --stage test -r eu-central-1
 
 artifacts:
   files:
