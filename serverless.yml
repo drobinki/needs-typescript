@@ -1,8 +1,8 @@
 service:
   name: needs-typescript
 # app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
+app: needs-service
+org: drobinki
 
 # Add the serverless-webpack plugin
 plugins:
@@ -11,10 +11,11 @@ plugins:
 provider:
   name: aws
   runtime: nodejs10.x
+  profile: serverless-admin
 
 functions:
   hello:
-    handler: handler.hello
+    handler: functions/handler.hello
     events:
       - http:
           method: get

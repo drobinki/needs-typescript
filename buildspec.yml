@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - npm install --silent --no-progress -g npm
+      - npm install --silent --no-progress -g serverless
+  pre_build:
+    commands:
+      - npm install --silent --no-progress
+  build:
+    commands:
+      - npm run-script lint
+      - npm run test
+      - mkdir target
+      - serverless package --package target -r eu-central-1
+
+artifacts:
+  files:
+    - target/**/*
+    - serverless.yml
+    - deploy.sh
