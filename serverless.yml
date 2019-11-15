@@ -24,4 +24,5 @@ resources:
   - ${file(resources/api-gateway.yml)}
   # Cognito
   - ${file(resources/cognito-user-pool.yml)}
+  - ${file(resources/event-store.yml)}
 
