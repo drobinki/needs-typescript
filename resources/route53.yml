@@ -1,0 +1,7 @@
+Resources:
+  DNS:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      HostedZoneConfig:
+        Comment: hosted zone for drobinki.pl
+      Name: drobinki.pl
