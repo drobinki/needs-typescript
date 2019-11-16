@@ -9,6 +9,24 @@ provider:
   runtime: nodejs10.x
   region: eu-central-1
 
+  iamRoleStatements:
+    # Dynamo Event Store Permissions
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource:
+        - !GetAtt EventStoreTable.Arn
+    # Dynamo NeedTable Permissions
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource:
+        - !GetAtt NeedTable.Arn
+
 functions:
   hello:
     handler: functions/handler.hello
@@ -25,4 +43,5 @@ resources:
   # Cognito
   - ${file(resources/cognito-user-pool.yml)}
   - ${file(resources/event-store.yml)}
+  - ${file(resources/need-table.yml)}
 
