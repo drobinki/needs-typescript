@@ -44,4 +44,6 @@ resources:
   - ${file(resources/cognito-user-pool.yml)}
   - ${file(resources/event-store.yml)}
   - ${file(resources/need-table.yml)}
+  - ${file(resources/outbox-sns.yml)}
+  - ${file(resources/needs-sqs.yml)}
 
