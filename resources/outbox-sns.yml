@@ -1,0 +1,8 @@
+Resources:
+  OutboxSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: outbox
+      Subscription:
+        - Endpoint: !GetAtt NeedsSQSTopic.Arn
+          Protocol: sqs

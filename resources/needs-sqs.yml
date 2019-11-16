@@ -1,0 +1,6 @@
+Resources:
+  NeedsSQSTopic:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 1209600
+      QueueName: needs
