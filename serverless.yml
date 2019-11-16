@@ -46,4 +46,6 @@ resources:
   - ${file(resources/need-table.yml)}
   - ${file(resources/outbox-sns.yml)}
   - ${file(resources/needs-sqs.yml)}
+#  - ${file(resources/cloudfront-s3.yml)}
+  - ${file(resources/route53.yml)}
 
