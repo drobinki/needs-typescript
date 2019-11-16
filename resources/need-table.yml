@@ -1,0 +1,14 @@
+Resources:
+  NeedTable:
+    Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+            - AttributeName: needId
+              AttributeType: S
+        KeySchema:
+          - AttributeName: needId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
