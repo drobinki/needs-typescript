@@ -40,12 +40,14 @@ functions:
 
 resources:
   - ${file(resources/api-gateway.yml)}
-  # Cognito
   - ${file(resources/cognito-user-pool.yml)}
   - ${file(resources/event-store.yml)}
   - ${file(resources/need-table.yml)}
   - ${file(resources/outbox-sns.yml)}
   - ${file(resources/needs-sqs.yml)}
+#  - ${file(resources/admin-role.yml)}
+#  - ${file(resources/code-pipeline.yml)}
+#  - ${file(resources/code-build.yml)}
   - ${file(resources/certificate.yml)}
   - ${file(resources/cloudfront-s3.yml)}
   - ${file(resources/route53.yml)}
