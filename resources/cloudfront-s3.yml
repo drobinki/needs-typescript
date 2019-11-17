@@ -51,5 +51,5 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
         PriceClass: PriceClass_All
         ViewerCertificate:
-          AcmCertificateArn: !Ref AcmCertificateArn
+          AcmCertificateArn: !Ref DrobinkiCert
           SslSupportMethod: sni-only
