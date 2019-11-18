@@ -49,6 +49,6 @@ resources:
 #  - ${file(resources/code-pipeline.yml)}
 #  - ${file(resources/code-build.yml)}
 #  - ${file(resources/certificate.yml)}
-  - ${file(resources/cloudfront-s3.yml)}
+#  - ${file(resources/cloudfront-s3.yml)}
 #  - ${file(resources/route53.yml)}
 
