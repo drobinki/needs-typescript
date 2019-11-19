@@ -1,6 +1,0 @@
-Resources:
-  DrobinkiCert:
-    Type: AWS::CertificateManager::Certificate
-    Properties:
-      DomainName: '*.drobinki.pl'
-      ValidationMethod: DNS

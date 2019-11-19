@@ -18,15 +18,7 @@ Parameters:
     Type: String
     Default: needs-typescript
     Description: "Github repo name"
-  GithubOAuthToken:
-    Type: String
-    Description: "Github personal access token"
 Resources:
-  DrobinkiCert:
-    Type: AWS::CertificateManager::Certificate
-    Properties:
-      DomainName: '*.drobinki.pl'
-      ValidationMethod: DNS
   CodePipeline:
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
@@ -49,7 +41,7 @@ Resources:
                 Owner: !Ref GithubOwner
                 Repo: !Ref GithubRepo
                 Branch: master
-                OAuthToken: !Ref GithubOAuthToken
+                OAuthToken: '{{resolve:secretsmanager:GITHUB_OAUTH:SecretString}}'
         - Name: Build
           Actions:
             - Name: BuildAction
@@ -125,8 +117,8 @@ Resources:
   CodeBuild:
     Type: 'AWS::CodeBuild::Project'
     Properties:
-      Name: !Sub ${self:provider.stage}-CodeBuild
-      ServiceRole: !GetAtt AdminRole.Arn
+      Name: Drobinki-CodeBuild
+      ServiceRole: !GetAtt CodeBuildRole.Arn
       Artifacts:
         # The downloaded source code for the build will come from CodePipeline
         Type: CODEPIPELINE
@@ -136,6 +128,14 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
         Image: "aws/codebuild/standard:2.0"
+        EnvironmentVariables:
+          - Name: AWS_ACCESS_KEY_ID
+            Type: SECRETS_MANAGER
+            Value: AWS_ACCESS_KEY_ID
+          - Name: AWS_SECRET_ACCESS_KEY
+            Type: SECRETS_MANAGER
+            Value: AWS_SECRET_ACCESS_KEY
+
       Source:
         Type: CODEPIPELINE
     # IAM role that allows CodeBuild to interact with S3, CloudWatch, and CloudFront
@@ -174,65 +174,9 @@ Resources:
                   - "cloudfront:CreateInvalidation"
                 Resource:
                   - "*"
-  DNS:
-    Type: AWS::Route53::HostedZone
-    Properties:
-      HostedZoneConfig:
-        Comment: hosted zone for drobinki.pl
-      Name: drobinki.pl
-  WebsiteBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: www.drobinki.pl
-      AccessControl: PublicRead
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: 404.html
-    DeletionPolicy: Retain
-  WebsiteBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref 'WebsiteBucket'
-      PolicyDocument:
-        Statement:
-          - Sid: PublicReadForGetBucketObjects
-            Effect: Allow
-            Principal: '*'
-            Action: s3:GetObject
-            Resource: !Join ['', ['arn:aws:s3:::', !Ref 'WebsiteBucket', /*]]
-  WebsiteCloudfront:
-    Type: AWS::CloudFront::Distribution
-    DependsOn:
-      - WebsiteBucket
-    Properties:
-      DistributionConfig:
-        Comment: Cloudfront Distribution pointing to S3 bucket
-        Origins:
-          - DomainName: !Select [2, !Split ["/", !GetAtt WebsiteBucket.WebsiteURL]]
-            Id: S3Origin
-            CustomOriginConfig:
-              HTTPPort: '80'
-              HTTPSPort: '443'
-              OriginProtocolPolicy: http-only
-        Enabled: true
-        HttpVersion: 'http2'
-        DefaultRootObject: index.html
-        Aliases:
-          - www.drobinki.pl
-        DefaultCacheBehavior:
-          AllowedMethods:
-            - GET
-            - HEAD
-          Compress: true
-          TargetOriginId: S3Origin
-          ForwardedValues:
-            QueryString: true
-            Cookies:
-              Forward: none
-          ViewerProtocolPolicy: redirect-to-https
-        PriceClass: PriceClass_All
-        ViewerCertificate:
-          AcmCertificateArn: !Ref DrobinkiCert
-          SslSupportMethod: sni-only
-
-
+              - Effect: Allow
+                Action:
+                  - "secretsmanager:GetSecretValue"
+                Resource:
+                  - "arn:aws:secretsmanager:eu-central-1:341177693298:secret:AWS_SECRET_ACCESS_KEY-uEifdC"
+                  - "arn:aws:secretsmanager:eu-central-1:341177693298:secret:AWS_ACCESS_KEY_ID-0BXlVY"
