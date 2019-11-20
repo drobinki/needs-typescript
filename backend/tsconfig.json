@@ -8,5 +8,7 @@
     "target": "es2017",
     "outDir": "lib"
   },
-  "exclude": ["node_modules"]
+  "exclude": [
+    "../node_modules"
+  ]
 }

@@ -9,6 +9,7 @@ phases:
       - npm install --silent --no-progress -g serverless
   pre_build:
     commands:
+      - cd backend
       - npm install --silent --no-progress
   build:
     commands:
