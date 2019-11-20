@@ -42,7 +42,7 @@ Resources:
                 Repo: !Ref GithubRepo
                 Branch: master
                 OAuthToken: '{{resolve:secretsmanager:GITHUB_OAUTH:SecretString}}'
-        - Name: Build
+        - Name: Build_Deploy_Backend
           Actions:
             - Name: BuildAction
               ActionTypeId:
@@ -56,6 +56,20 @@ Resources:
                 - Name: MyAppBuild
               Configuration:
                 ProjectName: !Ref CodeBuild
+        - Name: Build_Deploy_Frontend
+          Actions:
+            - Name: BuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: MyApp
+              OutputArtifacts:
+                - Name: MyAppBuild
+              Configuration:
+                ProjectName: !Ref CodeBuildFrontend
   CodePipeLineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -137,6 +151,30 @@ Resources:
             Value: AWS_SECRET_ACCESS_KEY
 
       Source:
+        Type: CODEPIPELINE
+  CodeBuildFrontend:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: Drobinki-CodeBuild
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        # The downloaded source code for the build will come from CodePipeline
+        Type: CODEPIPELINE
+        Name: Drobinki
+      Environment:
+        # Linux container with node installed
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: "aws/codebuild/standard:2.0"
+        EnvironmentVariables:
+          - Name: AWS_ACCESS_KEY_ID
+            Type: SECRETS_MANAGER
+            Value: AWS_ACCESS_KEY_ID
+          - Name: AWS_SECRET_ACCESS_KEY
+            Type: SECRETS_MANAGER
+            Value: AWS_SECRET_ACCESS_KEY
+      Source:
+        BuildSpec: buildspec-front.yml
         Type: CODEPIPELINE
     # IAM role that allows CodeBuild to interact with S3, CloudWatch, and CloudFront
   CodeBuildRole:
