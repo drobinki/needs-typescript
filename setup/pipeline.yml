@@ -67,7 +67,7 @@ Resources:
               InputArtifacts:
                 - Name: MyApp
               OutputArtifacts:
-                - Name: MyAppBuild
+                - Name: MyAppBuildFront
               Configuration:
                 ProjectName: !Ref CodeBuildFrontend
   CodePipeLineRole:
@@ -155,7 +155,7 @@ Resources:
   CodeBuildFrontend:
     Type: 'AWS::CodeBuild::Project'
     Properties:
-      Name: Drobinki-CodeBuild
+      Name: Drobinki-CodeBuild-Frontend
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Artifacts:
         # The downloaded source code for the build will come from CodePipeline

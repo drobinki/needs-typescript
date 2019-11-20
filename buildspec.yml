@@ -18,9 +18,9 @@ phases:
 #      - mkdir target
 #      - serverless package --package target -r eu-central-1
       - serverless deploy --stage test -r eu-central-1
-
-artifacts:
-  files:
-    - target/**/*
-    - serverless.yml
-    - deploy.sh
+#
+#artifacts:
+#  files:
+#    - target/**/*
+#    - serverless.yml
+#    - deploy.sh
