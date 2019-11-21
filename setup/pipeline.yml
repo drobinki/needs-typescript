@@ -70,6 +70,20 @@ Resources:
                 - Name: MyAppBuildFront
               Configuration:
                 ProjectName: !Ref CodeBuildFrontend
+        - Name: Run_E2E_Tests
+          Actions:
+            - Name: BuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: MyApp
+              OutputArtifacts:
+                - Name: MyAppBuildE2E
+              Configuration:
+                ProjectName: !Ref CodeBuildE2E
   CodePipeLineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -175,6 +189,23 @@ Resources:
             Value: AWS_SECRET_ACCESS_KEY
       Source:
         BuildSpec: buildspec-front.yml
+        Type: CODEPIPELINE
+  CodeBuildE2E:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: Drobinki-CodeBuild-E2E
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        # The downloaded source code for the build will come from CodePipeline
+        Type: CODEPIPELINE
+        Name: Drobinki
+      Environment:
+        # Linux container with node installed
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: "aws/codebuild/standard:2.0"
+      Source:
+        BuildSpec: buildspec-e2e.yml
         Type: CODEPIPELINE
     # IAM role that allows CodeBuild to interact with S3, CloudWatch, and CloudFront
   CodeBuildRole:
