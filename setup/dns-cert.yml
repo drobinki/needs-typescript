@@ -1,3 +1,4 @@
+---
 AWSTemplateFormatVersion: '2010-09-09'
 Metadata:
   License: Apache-2.0
@@ -5,22 +6,6 @@ Description: 'AWS CloudFormation Sample Template DynamoDB_Table: This template d
   the creation of a DynamoDB table.  **WARNING** This template creates an Amazon DynamoDB
   table. You will be billed for the AWS resources used if you create a stack from
   this template.'
-Parameters:
-  ProjectSource:
-    Type: String
-    Default: "https://github.com/drobinki/needs-typescript"
-    Description: "Source control URL (e.g. Github)"
-  GithubOwner:
-    Type: String
-    Default: drobinki
-    Description: "Github repo owner"
-  GithubRepo:
-    Type: String
-    Default: needs-typescript
-    Description: "Github repo name"
-  GithubOAuthToken:
-    Type: String
-    Description: "Github personal access token"
 Resources:
   DrobinkiCert:
     Type: AWS::CertificateManager::Certificate

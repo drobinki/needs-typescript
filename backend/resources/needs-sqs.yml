@@ -1,6 +1,43 @@
 Resources:
-  NeedsSQSTopic:
+  NeedsSQSQueue:
     Type: AWS::SQS::Queue
     Properties:
-      MessageRetentionPeriod: 1209600
-      QueueName: needs
+      QueueName: ${self:service}-${self:provider.stage}-need-queue
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt
+          - NeedSQSQueueDLQ
+          - Arn
+        maxReceiveCount: 3
+
+  # Create our 'needQueue' Dead Letter Queue SQS queue
+  NeedSQSQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:service}-${self:provider.stage}-need-queue-dlq
+
+  OutboxSNSTopicSubscriptionPolicy:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: sqs
+      Endpoint: !GetAtt NeedsSQSQueue.Arn
+      RawMessageDelivery: false
+      TopicArn: !Ref OutboxSNSTopic
+
+  OutboxSNSTopicToNeedsSQSQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "allow-sns-messages"
+            Effect: Allow
+            Principal: "*"
+            Resource: !GetAtt
+              - NeedsSQSQueue
+              - Arn
+            Action: "SQS:SendMessage"
+            Condition:
+              ArnEquals:
+                "aws:SourceArn": !Ref OutboxSNSTopic
+      Queues:
+        - Ref: NeedsSQSQueue

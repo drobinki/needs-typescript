@@ -9,6 +9,10 @@ provider:
   runtime: nodejs10.x
   region: eu-central-1
 
+  environment:
+    DROBINKI_TOPIC: !Ref OutboxSNSTopic
+    EVENTSTORE_TABLE: !Ref EventStoreTable
+
   iamRoleStatements:
     # Dynamo Event Store Permissions
     - Effect: Allow
@@ -26,17 +30,45 @@ provider:
         - dynamodb:PutItem
       Resource:
         - !GetAtt NeedTable.Arn
+    - Effect: Allow
+      Action:
+        - SNS:Publish
+      Resource:
+        - !Ref OutboxSNSTopic
 
 functions:
-  hello:
-    handler: functions/handler.hello
+  postNeed:
+    handler: functions/postNeed.handler
     events:
       - http:
           method: get
-          path: hello
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !Ref DrobinkiApiGateway
+          path: post-need
+
+  allNeeds:
+    handler: functions/allNeeds.handler
+    events:
+      - http:
+          method: get
+          path: all-needs
+
+  needProjection:
+    handler: functions/infrastructure/needProjection.handler
+    events:
+      - sqs:
+          arn: !GetAtt NeedsSQSQueue.Arn
+          batchSize: 1
+
+  events2Sns:
+    handler: functions/infrastructure/events2Sns.handler
+    description: 'Streams Dynamo EventStore Events to SNS'
+    events:
+      - stream:
+          type: dynamodb
+          startingPosition: LATEST
+          batchSize: 1
+          enabled: true
+          arn: !GetAtt EventStoreTable.StreamArn
+
 
 resources:
   - ${file(resources/api-gateway.yml)}

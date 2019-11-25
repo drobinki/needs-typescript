@@ -2,7 +2,21 @@ Resources:
   OutboxSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: outbox
-      Subscription:
-        - Endpoint: !GetAtt NeedsSQSTopic.Arn
-          Protocol: sqs
+      TopicName: ${self:service}-${self:provider.stage}-need-topic
+      DisplayName: NeedTopic
+
+  OutpoxTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: '*'
+          Action: sns:Subscribe
+          Resource: !Ref OutboxSNSTopic
+      Topics:
+        - !Ref OutboxSNSTopic
+
+
