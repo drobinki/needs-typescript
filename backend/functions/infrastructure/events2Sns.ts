@@ -11,15 +11,11 @@ export const handler = (event, _, cb) => {
         // ignore if something is deleted from dynamo manually
         return cb(null)
     }
-    const streamId = event.Records[0].dynamodb.NewImage.streamId.S
-    const version = event.Records[0].dynamodb.NewImage.version.N
+    const domainEvent = event.Records[0].dynamodb.NewImage.event.S
 
     function sendEvent(topic): Promise<any> {
         return sns.publish({
-            Message: JSON.stringify({
-                streamId,
-                version
-            }),
+            Message: domainEvent,
             TopicArn: topic
         })
             .promise()

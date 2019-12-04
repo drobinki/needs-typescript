@@ -30,6 +30,14 @@ provider:
         - dynamodb:PutItem
       Resource:
         - !GetAtt NeedTable.Arn
+    # Dynamo HelloTable Permissions
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource:
+        - !GetAtt HelloTable.Arn
     - Effect: Allow
       Action:
         - SNS:Publish
@@ -37,22 +45,35 @@ provider:
         - !Ref OutboxSNSTopic
 
 functions:
-  postNeed:
-    handler: functions/postNeed.handler
+  createHello:
+    handler: functions/api/createHello.handler
+    events:
+      - http:
+          method: post
+          path: hello
+
+  updateHello:
+    handler: functions/api/updateHello.handler
+    events:
+      - http:
+          method: put
+          path: hello
+
+  allHelos:
+    handler: functions/api/allHellos.handler
     events:
       - http:
           method: get
-          path: post-need
+          path: hello
 
-  allNeeds:
-    handler: functions/allNeeds.handler
+  needProjector:
+    handler: functions/infrastructure/needProjector.handler
     events:
-      - http:
-          method: get
-          path: all-needs
-
-  needProjection:
-    handler: functions/infrastructure/needProjection.handler
+      - sqs:
+          arn: !GetAtt NeedsSQSQueue.Arn
+          batchSize: 1
+  helloProjector:
+    handler: functions/infrastructure/helloProjector.handler
     events:
       - sqs:
           arn: !GetAtt NeedsSQSQueue.Arn
