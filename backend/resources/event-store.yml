@@ -31,3 +31,8 @@ Resources:
         Enabled: true
       StreamSpecification:
         StreamViewType: NEW_IMAGE
+
+Outputs:
+  EventStoreTableId:
+    Value:
+      Ref: EventStoreTable

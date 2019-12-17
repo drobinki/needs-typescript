@@ -15,7 +15,7 @@ Resources:
     Properties:
       QueueName: ${self:service}-${self:provider.stage}-need-queue-dlq
 
-  OutboxSNSTopicSubscriptionPolicy:
+  OutboxSNSTopicNeedSubscriptionPolicy:
     Type: AWS::SNS::Subscription
     Properties:
       Protocol: sqs
@@ -41,3 +41,46 @@ Resources:
                 "aws:SourceArn": !Ref OutboxSNSTopic
       Queues:
         - Ref: NeedsSQSQueue
+
+  HelloSQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:service}-${self:provider.stage}-hello-queue
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt
+          - HelloSQSQueueDLQ
+          - Arn
+        maxReceiveCount: 3
+
+  # Create our 'helloQueue' Dead Letter Queue SQS queue
+  HelloSQSQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:service}-${self:provider.stage}-hello-queue-dlq
+
+  OutboxSNSTopicHelloSubscriptionPolicy:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: sqs
+      Endpoint: !GetAtt HelloSQSQueue.Arn
+      RawMessageDelivery: false
+      TopicArn: !Ref OutboxSNSTopic
+
+  OutboxSNSTopicToHelloSQSQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "allow-sns-messages"
+            Effect: Allow
+            Principal: "*"
+            Resource: !GetAtt
+              - HelloSQSQueue
+              - Arn
+            Action: "SQS:SendMessage"
+            Condition:
+              ArnEquals:
+                "aws:SourceArn": !Ref OutboxSNSTopic
+      Queues:
+        - Ref: HelloSQSQueue

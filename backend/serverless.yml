@@ -12,12 +12,14 @@ provider:
   environment:
     DROBINKI_TOPIC: !Ref OutboxSNSTopic
     EVENTSTORE_TABLE: !Ref EventStoreTable
+    HELLO_TABLE: !Ref HelloTable
 
   iamRoleStatements:
     # Dynamo Event Store Permissions
     - Effect: Allow
       Action:
         - dynamodb:Query
+        - dynamodb:Scan
         - dynamodb:GetItem
         - dynamodb:PutItem
       Resource:
@@ -30,6 +32,26 @@ provider:
         - dynamodb:PutItem
       Resource:
         - !GetAtt NeedTable.Arn
+    # Dynamo HelloTable Permissions
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:Scan
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - !GetAtt HelloTable.Arn
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource:
+        Fn::Join:
+          - ''
+          - - !GetAtt HelloTable.Arn
+            - '/index/*'
     - Effect: Allow
       Action:
         - SNS:Publish
@@ -37,25 +59,45 @@ provider:
         - !Ref OutboxSNSTopic
 
 functions:
-  postNeed:
-    handler: functions/postNeed.handler
+  createHello:
+    handler: functions/api/createHello.handler
+    events:
+      - http:
+          method: post
+          path: hello
+
+  updateHello:
+    handler: functions/api/updateHello.handler
+    events:
+      - http:
+          method: put
+          path: hello
+
+  allHelos:
+    handler: functions/api/allHellos.handler
     events:
       - http:
           method: get
-          path: post-need
-
-  allNeeds:
-    handler: functions/allNeeds.handler
+          path: hello
+  allEvents:
+    handler: functions/api/allEvents.handler
     events:
       - http:
           method: get
-          path: all-needs
+          path: events
 
-  needProjection:
-    handler: functions/infrastructure/needProjection.handler
+  needProjector:
+    handler: functions/infrastructure/needProjector.handler
     events:
       - sqs:
           arn: !GetAtt NeedsSQSQueue.Arn
+          batchSize: 1
+
+  helloProjector:
+    handler: functions/infrastructure/helloProjector.handler
+    events:
+      - sqs:
+          arn: !GetAtt HelloSQSQueue.Arn
           batchSize: 1
 
   events2Sns:
