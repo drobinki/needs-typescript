@@ -1,6 +1,10 @@
-import {Event, HelloCreated} from "./events";
+import {Event} from "./events";
 
 
 export function createHello(userId: string, comment: string): Event[] {
-    return [new HelloCreated(userId, comment)]
+    return [{
+        kind: "HelloCreated",
+        userId: userId,
+        message: comment
+    }]
 }

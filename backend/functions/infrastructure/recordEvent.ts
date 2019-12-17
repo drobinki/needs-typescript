@@ -1,5 +1,4 @@
 
-
 export interface RecordEvent {
     commitId: string,
     committedAt: number,

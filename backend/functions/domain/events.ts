@@ -2,33 +2,16 @@
 export type Event = HelloCreated | HelloChanged
 
 
-export class HelloCreated {
-    type = "HelloCreated";
-
-    constructor(private userId: string, private message: string) {}
-
-    getUserId(): string {
-        return this.userId;
-    }
-
-    getMessage(): string {
-        return this.message;
-    }
+export interface HelloCreated {
+    kind: "HelloCreated";
+    userId: String;
+    message: String;
 }
 
-export class HelloChanged {
-
-    type = "HelloCreated"
-
-    constructor(private userId: string, private newMessage: string) {}
-
-    getUserId(): string {
-        return this.userId;
-    }
-
-    getNewMessage(): string {
-        return this.newMessage;
-    }
+export interface HelloChanged {
+    kind: "HelloChanged"
+    userId: String;
+    newMessage: String;
 }
 
 

@@ -1,35 +1,34 @@
 import {SQSEvent} from "aws-lambda";
-import {HelloChanged, HelloCreated} from "../domain/events";
 import {HelloView} from "../domain/helloView";
 import { helloViewRepository } from "../domain/helloViewRepository";
 
-function apply(hello: HelloView, event: any): HelloView {
-    switch (event.type) {
-        case HelloCreated.name: {
+function apply(hello: HelloView, message: any): HelloView {
+    let event  = message.event
+    console.log(event.type)
+    switch (event.kind) {
+        case "HelloCreated": {
            return {
-               userId: event.getUserId(),
+               userId: event.userId,
+               version: message.version,
                comment: event.message
            }
         }
-        case HelloChanged.name: {
+        case "HelloChanged": {
             return {
                 userId: hello.userId,
+                version: message.version,
                 comment: event.newMessage
             }
         }
     }
 }
 
-function updateView(event: any) {
+function updateView(message: any) {
     console.log("Loading user view")
-    console.log(event)
-    return helloViewRepository().load(event.userId)
+    console.log(message)
+    return helloViewRepository().load(message.event.userId)
         .then((helloView) => {
-            console.log("Before apply event")
-            console.log(helloView)
-            let newHelloView = apply(helloView, event)
-            console.log("After apply event")
-            console.log(newHelloView)
+            let newHelloView = apply(helloView || <HelloView> {}, message)
             return helloViewRepository().save(newHelloView)
         })
 }
@@ -40,8 +39,15 @@ export const handler = async (event: SQSEvent, _) => {
     var allEvents = event.Records
         .map((record) => {
             var body = JSON.parse(record.body)
-            return body.Message
+            return JSON.parse(body.Message)
         });
     await Promise.all(allEvents.map((event) => updateView(event)))
+        .then((_) => {
+            console.log("I did it, view is saved");
+        })
+        .catch((err) => {
+            console.log("Failing to persist view")
+            console.log(err);
+        })
     console.info("EVENT\n" + JSON.stringify(event, null, 2))
 }

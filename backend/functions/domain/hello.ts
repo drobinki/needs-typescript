@@ -1,4 +1,5 @@
 interface Hello {
     userId: string;
-    text: string;
+    version: number,
+    message: String;
 }

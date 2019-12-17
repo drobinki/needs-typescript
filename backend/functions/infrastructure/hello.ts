@@ -1,26 +1,28 @@
 
-import {HelloChanged, HelloCreated} from "../domain/events";
 import {RecordEvent} from "./recordEvent";
 
-function apply(state: any, created: RecordEvent) {
-    let event = JSON.parse(created.event);
-    switch (created.name) {
-        case HelloCreated.name: {
+function apply(state: any, recordEvent: RecordEvent) {
+    let event = JSON.parse(recordEvent.event);
+    switch (event.kind) {
+        case "HelloCreated": {
             return {
-                ...event
+                version: recordEvent.version,
+                userId: event.userId,
+                message: event.message
             }
         }
-        case HelloChanged.name: {
+        case "HelloChanged": {
             return {
                 ...state,
-                message: event.getNewMessage()
+                version: recordEvent.version,
+                message: event.newMessage
             }
         }
     }
 }
 
 export function toHello(events: RecordEvent[]): Hello {
-    const hello = events
+    const hello = <Hello> events
         .reduce((acc, event) => apply(acc, event), {});
     return hello
 }

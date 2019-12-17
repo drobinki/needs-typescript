@@ -4,28 +4,38 @@ import {DynamoDB} from "aws-sdk";
 import {HelloView} from "../domain/helloView";
 
 const dynamoClient = new DynamoDB.DocumentClient()
+const helloTable = process.env.HELLO_TABLE
 
 function toPutItem(hello: HelloView){
     return <DocumentClient.PutItemInput>{
-        TableName: "HelloTable",
+        TableName: helloTable,
         Item: {
             userId: hello.userId,
             comment: hello.comment
         },
-        ConditionExpression: 'attribute_not_exists(version)',
         ReturnValues: 'NONE'
     }
 }
 
 export class DynamoHelloViewRepository implements HelloViewRepository {
     load(userId: String): Promise<HelloView> {
-        return dynamoClient.query({
-            TableName: "HelloTable",
-            ConsistentRead: true,
-            KeyConditionExpression: 'userId = :a',
-            ExpressionAttributeValues: {
-                ':a': { S: userId }
+        console.log(helloTable)
+        console.log(userId)
+        return dynamoClient.get({
+            TableName: helloTable,
+            Key: {
+                'userId': userId
             }
+        }).promise()
+            .then((res) => {
+                return <HelloView> res.Item
+            })
+    }
+
+    all(): Promise<HelloView[]> {
+        return dynamoClient.scan({
+            TableName: helloTable,
+            ConsistentRead: true,
         }).promise()
             .then((res) => {
                 return res.Items
@@ -34,7 +44,6 @@ export class DynamoHelloViewRepository implements HelloViewRepository {
                             ...item
                         }
                     })
-                    .shift()
             })
     }
 

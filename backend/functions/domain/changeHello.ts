@@ -1,6 +1,10 @@
-import {Event, HelloChanged} from "./events";
+import {Event} from "./events";
 
 
 export function changeHello(hello: Hello, newComment: string): Event[] {
-    return [new HelloChanged(hello.userId, newComment)]
+    return [{
+        kind: "HelloChanged",
+        userId: hello.userId,
+        newMessage: newComment
+    }]
 }

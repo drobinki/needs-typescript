@@ -35,11 +35,11 @@ function saveToDynamo(persistEvents: DocumentClient.PutItemInput[]): Promise<any
 }
 
 function toPersisted(streamId: String, causationId: String, correlationId: String, aggregate: String, persistAt: number) {
-    return (event, version) => {
+    return (event: Event, version) => {
         return <DocumentClient.PutItemInput>{
             TableName: esTable,
             Item: {
-                name: event.type,
+                name: event.kind,
                 commitId: persistAt + ':' + streamId,
                 committedAt: persistAt,
                 streamId: streamId,
@@ -65,26 +65,51 @@ export class DynamoEventStore implements EventStore {
             return saveToDynamo(
                 events
                     .map((event, index) => {
-                        return toPersistEvent(event, expectedVersion + index)
+                        console.log('Persisting the event')
+                        console.log(event);
+                        console.log(expectedVersion + index + 1)
+                        let putItemInput = toPersistEvent(event, expectedVersion + index + 1);
+                        console.log(putItemInput)
+                        return putItemInput
                     })
             )
         }
     }
 
+    all(): Promise<RecordEvent[]> {
+        console.log("Loading events");
+        return dynamoClient.scan({
+            TableName: esTable,
+            ConsistentRead: true,
+        })
+            .promise()
+            .then(res => {
+                return res.Items
+                    .map((item) => {
+                        return <RecordEvent> {
+                            ...item
+                        }
+                    })
+            })
+
+    }
+
     load(streamId: String, version: Number = 0): Promise<RecordEvent[]> {
+        console.log("Loading events");
         return dynamoClient.query({
             TableName: esTable,
             ConsistentRead: true,
             KeyConditionExpression: 'streamId = :a AND version >= :v',
             ExpressionAttributeValues: {
-                ':a': { S: streamId },
-                ':v': { N: version }
+                ':a': streamId,
+                ':v': version
             }
         })
         .promise()
             .then(res => {
                 return res.Items
                     .map((item) => {
+                        console.log("Loaded event");
                         console.log(item);
                         return <RecordEvent> {
                             ...item
