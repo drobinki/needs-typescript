@@ -1,7 +1,7 @@
 import {APIGatewayProxyHandler} from 'aws-lambda';
 import 'source-map-support/register';
-import {eventStore} from '../domain/eventStore'
-import {createHello} from "../domain/createHello";
+import {AggregateTypes, eventStore} from '../domain/eventStore'
+import {createHello} from "../domain/hello";
 
 
 export const handler: APIGatewayProxyHandler = async (event, _context) => {
@@ -12,7 +12,7 @@ export const handler: APIGatewayProxyHandler = async (event, _context) => {
     await eventStore().save(command.userId, 0, events)({
         correlationId: "1",
         causationId: "2",
-        aggregate: "Hello"
+        aggregate: AggregateTypes.Hello
     });
     return {
         statusCode: 200,

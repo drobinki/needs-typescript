@@ -5,11 +5,21 @@ import {RecordEvent} from "../infrastructure/recordEvent";
 const dynamoEventStore = new DynamoEventStore()
 
 export interface EventStore {
-    save(streamId: String, expectedVersion: Number, events: Event[]): (Context) => Promise<any>
-    load(streamId: String): Promise<RecordEvent[]>
+    save(streamId: string, expectedVersion: number, events: Event[]): (context: EventContext) => Promise<any>
+    load(streamId: string): Promise<RecordEvent[]>
     all(): Promise<RecordEvent[]>
+}
+
+export interface EventContext {
+    correlationId: string,
+    causationId: string,
+    aggregate: AggregateTypes
 }
 
 export function eventStore() {
     return dynamoEventStore;
+}
+
+export enum AggregateTypes {
+    Hello = "Hello"
 }

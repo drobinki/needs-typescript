@@ -1,4 +1,4 @@
-import {EventStore} from "../domain/eventStore";
+import {EventContext, EventStore} from "../domain/eventStore";
 import {DynamoDB} from 'aws-sdk';
 import {Event} from "../domain/events";
 import {DocumentClient} from "aws-sdk/lib/dynamodb/document_client";
@@ -58,7 +58,7 @@ function toPersisted(streamId: String, causationId: String, correlationId: Strin
 
 export class DynamoEventStore implements EventStore {
 
-    save(streamId: String, expectedVersion: number, events: Event[]): (Context) => Promise<any> {
+    save(streamId: string, expectedVersion: number, events: Event[]): (context: EventContext) => Promise<any> {
         return (context: Context) => {
             const now = Date.now();
             const toPersistEvent = toPersisted(streamId, context.causationId, context.correlationId, context.aggregate, now)
